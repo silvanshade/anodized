@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- **[anodized] `no_std` support** - Disable default features to build without the mathematical carriers; the default `logic` feature preserves the `logic` and `arithmetic` exports.
+
 ### Fixed
 
 - **[anodized-core] `#[cfg]` on a condition is honored in every check mode** - The guard was
