@@ -102,6 +102,23 @@ jobs:
       - name: Integration test anodized with flags `${{ matrix.flags }}`
         run: cargo ${{ matrix.flags }} test -p anodized --tests --no-fail-fast ${{ matrix.test_flags }}
 
+  build-anodized-no-std:
+    name: Build anodized without std
+    runs-on: ubuntu-latest
+    needs: fmt
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@1.95.0
+
+      - name: Install bare-metal target
+        run: rustup target add thumbv7em-none-eabi
+
+      - name: Build anodized without default features
+        run: cargo build -p anodized --no-default-features --target thumbv7em-none-eabi
+
   test-anodized-fmt:
     name: Lint and test anodized-fmt
     runs-on: ubuntu-latest

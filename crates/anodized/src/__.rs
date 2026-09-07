@@ -1,5 +1,6 @@
 //! Module for the internal use of `anodized_macros`.
 
+#[cfg(feature = "logic")]
 use crate::types::Spec;
 
 /// Apply the closure to an owned value and then recover it.
@@ -23,6 +24,7 @@ pub fn eval_once<T>(closure: impl FnOnce() -> T) -> T {
 }
 
 /// Evaluate a type spec on a type that implements the `Spec` trait.
+#[cfg(feature = "logic")]
 pub fn eval_type_spec<T: Spec + ?Sized>(value: &T) -> bool {
     value.predicate()
 }
