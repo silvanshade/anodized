@@ -20,10 +20,18 @@ check-cfg = [
     "cfg(anodized_try)",
 ]
 
+[features]
+default = ["logic"]
+logic = ["dep:anodized-logic"]
+
 [dependencies]
-anodized-logic.workspace = true
+anodized-logic = { workspace = true, optional = true }
 anodized-macros.workspace = true
 
 [dev-dependencies]
 pollster = "0.4"
 trybuild = "1.0"
+
+[[test]]
+name = "arithmetic"
+required-features = ["logic"]
