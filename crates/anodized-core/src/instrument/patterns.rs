@@ -6,12 +6,20 @@ use syn::{Expr, Ident, Pat, PatIdent, parse_quote, visit_mut::VisitMut};
 mod patterns_tests;
 
 /// A 'tame' pattern can be used inside a `#[spec]`.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TamePat {
     /// The pattern binds only by `ref`. It may contain wildcard (`_`) and rest (`..`) patterns.
     Borrowing(Pat),
     /// The deconstructed value can be reconstructed from the pattern's bindings.
     Invertible(Pat, Box<Expr>),
+}
+
+impl TamePat {
+    pub fn get_pat(&self) -> &Pat {
+        match self {
+            Self::Borrowing(pat) | Self::Invertible(pat, _) => pat,
+        }
+    }
 }
 
 /// Tame an irrefutable pattern, so that it may be used inside a `#[spec]`.

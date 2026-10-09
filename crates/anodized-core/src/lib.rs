@@ -3,7 +3,7 @@
 use proc_macro2::Span;
 use syn::{Error, Expr, Meta, Pat};
 
-use crate::qualifiers::FnQualifiers;
+use crate::{instrument::patterns::TamePat, qualifiers::FnQualifiers};
 
 pub mod annotate;
 pub mod instrument;
@@ -38,13 +38,39 @@ pub struct FnSpec {
     span: Span,
 }
 
-/// Determines where the input in a `fn` signature satisfies its type spec.
+/// Determines where the type spec of an input in a `fn` signature must hold.
 #[derive(Debug)]
-pub struct InputSpecFlags {
-    /// Whether the input satisfies its type spec on entry.
-    pub on_entry: bool,
-    /// Whether the input satisfies its type spec on exit.
-    pub on_exit: bool,
+pub enum InputSpecFlags {
+    /// The type spec must hold neither on entry nor exit.
+    Neither,
+    /// The type spec must hold only on entry.
+    In(Pat),
+    /// The type spec must hold only on exit. The exit check needs a tame pattern.
+    Out(TamePat),
+    /// The type spec must hold both on entry and exit. The exit check needs a tame pattern.
+    Both(TamePat),
+}
+
+impl InputSpecFlags {
+    /// Whether the type spec must hold on entry.
+    pub fn on_entry(&self) -> Option<&Pat> {
+        match self {
+            InputSpecFlags::Neither => None,
+            InputSpecFlags::In(pat) => Some(pat),
+            InputSpecFlags::Out(_) => None,
+            InputSpecFlags::Both(tame_pat) => Some(tame_pat.get_pat()),
+        }
+    }
+
+    /// Whether the type spec must hold on exit. The pattern must be tame for runtime checks.
+    pub fn on_exit(&self) -> Option<&TamePat> {
+        match self {
+            InputSpecFlags::Neither => None,
+            InputSpecFlags::In(_) => None,
+            InputSpecFlags::Out(tame_pat) => Some(tame_pat),
+            InputSpecFlags::Both(tame_pat) => Some(tame_pat),
+        }
+    }
 }
 
 impl FnSpec {
@@ -59,7 +85,7 @@ impl FnSpec {
             && !self
                 .input_spec_flags
                 .iter()
-                .any(|input_spec| input_spec.on_entry || input_spec.on_exit)
+                .any(|input_spec| input_spec.on_entry().is_some() || input_spec.on_exit().is_some())
     }
 
     /// Construct an error from the whole spec.
@@ -68,27 +94,18 @@ impl FnSpec {
     }
 }
 
-impl Default for InputSpecFlags {
-    fn default() -> Self {
-        Self {
-            on_entry: true,
-            on_exit: true,
-        }
-    }
-}
-
-/// Specifies the intended behavior of a data type: `struct` or `enum`.
+/// Specifies the intended behavior of a type: `struct` or `enum`.
 #[derive(Debug)]
-pub struct DataSpec {
+pub struct TypeSpec {
     /// Whether each field satisfies its type spec. Variant index first, field index second.
     pub field_spec_flags: Vec<Vec<bool>>,
-    /// Invariants: conditions that must hold for all instances of the data type.
+    /// Invariants: conditions that must hold for all instances of the type.
     pub maintains: Vec<Condition>,
     /// The span in the source code, from which this spec was parsed.
     span: Span,
 }
 
-impl DataSpec {
+impl TypeSpec {
     /// Returns `true` if the spec is empty (specifies nothing), otherwise returns `false`.
     pub fn is_empty(&self) -> bool {
         self.maintains.is_empty()
@@ -153,7 +170,7 @@ pub struct Condition {
 #[derive(Debug)]
 pub struct PostCondition {
     /// The pattern to bind or destructure the function's output, e.g. `answer` or `(left, right)`.
-    pub pat: Option<Pat>,
+    pub pat: Option<TamePat>,
     /// The expression that validates the postcondition, e.g. `answer == "forty-two"`.
     pub expr: Expr,
     /// **Static analyzers can safely ignore this field.**

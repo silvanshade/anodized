@@ -7,18 +7,20 @@
 | [`fn`, free or inherent `impl`](#function-specs) | Pre- and postconditions, invariants. |
 | [`trait`](#trait-specs)                          | Enforces each `impl` to conform.     |
 | [`for` and `while`](#loop-specs)                 | Loop invariants and variant (bound). |
-| [`struct` and `enum`](#data-specs)               | Refinements to constrain instances.  |
+| [`struct` and `enum`](#type-specs)               | Type refinements to constrain data.  |
 
 ## Build Configurations
 
 Anodized uses `cfg` options to control how each `#[spec]` changes the Rust code.
 
-| `--cfg` Setting                                     | Effect                  |
-| --------------------------------------------------- | ----------------------- |
-| [`anodized_discard_specs`](#anodized_discard_specs) | disable spec embedding  |
-| [`anodized_panic`](#anodized_panic)                 | runtime check: panic    |
-| [`anodized_print`](#anodized_print)                 | runtime check: print    |
-| [`anodized_try`](#anodized_try)                     | runtime check: `Result` |
+| `--cfg` Setting                                     | Effect                   |
+| --------------------------------------------------- | ------------------------ |
+| [`anodized_discard_specs`](#anodized_discard_specs) | discard specs completely |
+| [`anodized_embed_specs`](#anodized_embed_specs)     | embed specs for analysis |
+| [`anodized_charon`](#anodized_charon)               | mark specs for Charon    |
+| [`anodized_panic`](#anodized_panic)                 | runtime check: panic     |
+| [`anodized_print`](#anodized_print)                 | runtime check: print     |
+| [`anodized_try`](#anodized_try)                     | runtime check: `Result`  |
 
 Select the desired options via compiler `cfg` flags, for example:
 
@@ -31,6 +33,24 @@ RUSTFLAGS="--cfg anodized_print" cargo test
 Disable embedding the specs as Rust code.
 
 **Important:** This has **no effect on runtime performance** because the embedded specs are always dead code. On the other hand, it **prevents syntax/type checking** specs, so it may decrease compilation time.
+
+### `anodized_embed_specs`
+
+Embed each specification as hidden Rust items alongside the annotated code, without changing the
+annotated items themselves. This mode is for static-analysis tools such as Charon/Aeneas and Hax
+that consume Anodized specs, so runtime instrumentation is inactive.
+
+`anodized_embed_specs` cannot be combined with `anodized_discard_specs`, `anodized_panic`,
+`anodized_print`, or `anodized_try`.
+
+### `anodized_charon`
+
+Enable marking embedded specifications with [Charon](https://github.com/AeneasVerif/charon) contract
+attributes. Generated precondition and postcondition items are marked with
+`#[charon::contract(...)]` so that Charon and Aeneas can associate them with the annotated function.
+
+Use this setting with a nightly Rust toolchain. Like `anodized_embed_specs`, it cannot be combined
+with `anodized_discard_specs` or any runtime-check setting.
 
 ## Runtime Checks
 
@@ -58,7 +78,7 @@ Use `#[cfg]` attributes on individual conditions to control when checks run (see
 When runtime checks are enabled, use the standard `#[cfg]` attribute to select build configurations under which a condition is checked.
 
 ```rust, no_run
-use anodized::spec;
+use anodized::{spec, types::Spec};
 
 #[spec(
     // Runtime checks only during `cargo test`.
@@ -83,6 +103,37 @@ The `#[cfg]` attribute follows standard Rust semantics: when the configuration p
 - No `#[cfg]`: Always check (like `assert!`).
 
 ## Function Specs
+
+### Constant functions
+
+`#[spec]` supports `const fn` with runtime checking disabled or with
+`anodized_panic`. Preconditions and invariants use direct Boolean checks;
+postconditions bind their output pattern, check it, and recover the owned value.
+No closure or non-const evaluator is introduced. Values with drop glue need no
+`Copy` or `Clone` bound; recovery avoids a temporary tuple requiring const destruction.
+All predicate expressions must themselves be const-compatible, including
+conditions disabled by `#[cfg]`. Disabled checks remain type-checked but are not evaluated.
+
+```rust
+use anodized::spec;
+
+#[spec(requires: value < 10, ensures: |result| result == value + 1)]
+const fn increment(value: u32) -> u32 { value + 1 }
+
+const FIVE: u32 = increment(4);
+assert_eq!(FIVE, increment(4));
+```
+
+With `anodized_panic`, violations panic at runtime and reject constant evaluation.
+Explicit returns pass through postconditions; nested functions, closures, and
+const blocks retain their own return boundaries. A body macro must not expand to
+a return from the enclosing function: attribute macros cannot rewrite tokens
+produced by later macro expansion.
+
+`captures`, type-spec markers, `anodized_print`, and `anodized_try` are rejected
+on const functions. Static spec embedding has its separate expansion and does
+not gain const support from this instrumentation mode.
+
 
 ### Preconditions, Postconditions, and Invariants
 
@@ -352,9 +403,10 @@ Important restrictions:
   - Static analyzers **must validate** narrowing as part of verification.
 - Names prefixed with `__anodized_` are internal and must not be implemented directly.
 
-### Data Specs
+### Type Specs (a.k.a. Type Refinements)
 
-Anodized supports specs on data types, meant to constrain all instances. This capability is equivalent to refinement types.
+Anodized supports type specs on `struct`s and `enum`s to constrain all their instances. This
+capability is equivalent to refinement types.
 
 **On a Struct**
 
@@ -397,3 +449,35 @@ Important restrictions:
 
 - Runtime checks are **not implemented** yet.
 - Only the `maintains` spec field is supported.
+
+### Type Spec Enforcement
+
+Type specs are not enforced at `#[spec]` boundaries unless a type is explicitly marked with the
+`Spec!(...)` macro.
+
+```rust, no_run
+use anodized::spec;
+
+#[spec]
+struct TypeWithSpec;
+
+#[spec]
+fn update(
+    input: Spec!(TypeWithSpec),
+    output: Spec!(&mut TypeWithSpec, out),
+) -> Spec!(TypeWithSpec) {
+    todo!()
+}
+
+#[spec]
+struct Container {
+    enforced: Spec!(TypeWithSpec),
+    unenforced: TypeWithSpec,
+}
+```
+
+- `Spec!(T)`: Enforce a function input's type spec on entry, a function output's type spec on
+  exit, or a field's type spec as part of its containing type's spec.
+- `Spec!(T, out)`: Enforce a function input's spec only on exit (not on entry).
+- `Spec!(T, inout)`: Enforce a function input's spec on both entry and exit.
+- Modes `out` and `inout` are only valid for function inputs.

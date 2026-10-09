@@ -1,8 +1,11 @@
 #![doc = include_str!("../README.md")]
+#![no_std]
 
+#[cfg(feature = "logic")]
 pub use anodized_logic as logic;
-pub use anodized_logic::arithmetic;
-pub use anodized_macros::{spec, unspec};
+#[cfg(feature = "logic")]
+pub use anodized_logic::{arithmetic, types};
+pub use anodized_macros::spec;
 
 pub mod __;
 pub mod result;

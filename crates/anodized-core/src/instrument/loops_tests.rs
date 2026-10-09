@@ -21,9 +21,10 @@ fn embed_spec_expr_while() {
     let expected: TokenStream = parse_quote! {
         while WHILE_COND {
             let __anodized_loop_maintains = || -> bool {
-                let __anodized_clause_1 = ::anodized::__::eval::<bool>(|| INVAR_1);
-                let __anodized_clause_2 = ::anodized::__::eval::<bool>(|| INVAR_2);
-                __anodized_clause_1 && __anodized_clause_2
+                let __anodized_pre = true;
+                let __anodized_pre = __anodized_pre & ::anodized::__::eval::<bool>(|| INVAR_1);
+                let __anodized_pre = __anodized_pre & ::anodized::__::eval::<bool>(|| INVAR_2);
+                __anodized_pre
             };
             let __anodized_loop_decreases = || {
                 let __anodized_value_1 = (|| DECREASES_1)();
@@ -34,7 +35,7 @@ fn embed_spec_expr_while() {
     };
 
     let spec = expr_while.parse_spec_from_attrs().unwrap();
-    Mode::EmbedSpecs.instrument_expr_while(spec, &mut expr_while);
+    Mode::EMBED_SPECS.instrument_expr_while(spec, &mut expr_while);
     let observed = expr_while;
 
     assert_tokens_eq(&observed, &expected);
@@ -57,9 +58,10 @@ fn embed_spec_expr_for() {
     let expected: TokenStream = parse_quote! {
         for FOR_VAR in FOR_EXPR {
             let __anodized_loop_maintains = || -> bool {
-                let __anodized_clause_1 = ::anodized::__::eval::<bool>(|| INVAR_1);
-                let __anodized_clause_2 = ::anodized::__::eval::<bool>(|| INVAR_2);
-                __anodized_clause_1 && __anodized_clause_2
+                let __anodized_pre = true;
+                let __anodized_pre = __anodized_pre & ::anodized::__::eval::<bool>(|| INVAR_1);
+                let __anodized_pre = __anodized_pre & ::anodized::__::eval::<bool>(|| INVAR_2);
+                __anodized_pre
             };
             let __anodized_loop_decreases = || {};
             LOOP_BODY
@@ -67,7 +69,7 @@ fn embed_spec_expr_for() {
     };
 
     let spec = expr_for_loop.parse_spec_from_attrs().unwrap();
-    Mode::EmbedSpecs.instrument_expr_for_loop(spec, &mut expr_for_loop);
+    Mode::EMBED_SPECS.instrument_expr_for_loop(spec, &mut expr_for_loop);
     let observed = expr_for_loop;
 
     assert_tokens_eq(&observed, &expected);

@@ -20,7 +20,7 @@
 pub use anodized_macros::try_call;
 
 /// Return type of a call wrapped by [`try_call!`].
-pub type Result<T> = std::result::Result<T, Error<T>>;
+pub type Result<T> = core::result::Result<T, Error<T>>;
 
 /// Construct a precondition failure.
 pub fn pre_err<T>() -> Result<T> {

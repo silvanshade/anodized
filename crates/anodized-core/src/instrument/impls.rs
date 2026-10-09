@@ -9,7 +9,7 @@ use syn::{
 use crate::{
     EmptySpec,
     annotate::Specified as _,
-    instrument::{Mode, make_item_error},
+    instrument::{Mode, fns::sanitize_input_patterns, make_item_error},
     syntax::remove_unique_attr,
 };
 
@@ -38,7 +38,7 @@ Instead, ensure that both the impl block and the fn have a `#[spec]` annotation.
 
                     let fn_spec = item_fn.parse_spec_from_attrs()?;
 
-                    if let Self::EmbedSpecs = self {
+                    if let Self::EmbedSpecs(_) = self {
                         // Embed `spec` elements as `__anodized_fn_*` items.
                         let attrs: [Attribute; 2] = [
                             parse_quote!(#[doc(hidden)]),
@@ -51,30 +51,63 @@ Instead, ensure that both the impl block and the fn have a `#[spec]` annotation.
                             fn_spec.qualifiers,
                             &item_fn.sig.ident,
                         );
+                        let mut spec_requires_attrs = attrs.to_vec();
+                        let mut spec_requires_sig = self.build_precondition_fn_sig(
+                            &mut spec_requires_attrs,
+                            "__anodized_fn_requires",
+                            &item_fn.sig,
+                        );
+                        {
+                            sanitize_input_patterns(
+                                &mut spec_requires_sig.inputs,
+                                &fn_spec.input_spec_flags,
+                            );
+                        }
+                        let spec_requires_body = Self::build_precondition_fn_body(
+                            {
+                                spec_requires_sig
+                                    .inputs
+                                    .iter()
+                                    .zip(&fn_spec.input_spec_flags)
+                            },
+                            &fn_spec.requires,
+                            &fn_spec.maintains,
+                        );
                         let spec_requires_fn = ImplItemFn {
-                            attrs: attrs.to_vec(),
-                            sig: Self::build_precondition_fn_sig(
-                                "__anodized_fn_requires",
-                                &item_fn.sig,
-                            ),
-                            block: Self::build_precondition_fn_body(
-                                &fn_spec.requires,
-                                &fn_spec.maintains,
-                            ),
+                            attrs: spec_requires_attrs,
+                            sig: spec_requires_sig,
+                            block: spec_requires_body,
                             vis: Visibility::Inherited,
                             defaultness: None,
                         };
+                        let mut spec_ensures_attrs = attrs.to_vec();
+                        let mut spec_ensures_sig = self.build_postcondition_fn_sig(
+                            &mut spec_ensures_attrs,
+                            "__anodized_fn_ensures",
+                            &item_fn.sig,
+                        );
+                        {
+                            sanitize_input_patterns(
+                                &mut spec_ensures_sig.inputs,
+                                &fn_spec.input_spec_flags,
+                            );
+                        }
+                        let spec_ensures_body = Self::build_postcondition_fn_body(
+                            {
+                                spec_ensures_sig
+                                    .inputs
+                                    .iter()
+                                    .zip(&fn_spec.input_spec_flags)
+                            },
+                            fn_spec.output_spec_flag.then_some(&item_fn.sig.output),
+                            &fn_spec.maintains,
+                            &fn_spec.captures,
+                            &fn_spec.ensures,
+                        );
                         let spec_ensures_fn = ImplItemFn {
-                            attrs: attrs.to_vec(),
-                            sig: Self::build_postcondition_fn_sig(
-                                "__anodized_fn_ensures",
-                                &item_fn.sig,
-                            ),
-                            block: Self::build_postcondition_fn_body(
-                                &fn_spec.maintains,
-                                &fn_spec.captures,
-                                &fn_spec.ensures,
-                            )?,
+                            attrs: spec_ensures_attrs,
+                            sig: spec_ensures_sig,
+                            block: spec_ensures_body,
                             vis: Visibility::Inherited,
                             defaultness: None,
                         };
@@ -85,7 +118,7 @@ Instead, ensure that both the impl block and the fn have a `#[spec]` annotation.
                     }
 
                     // Instrument function body.
-                    self.instrument_fn(&fn_spec, &item_fn.sig, &mut item_fn.block)?;
+                    self.instrument_fn(&fn_spec, &mut item_fn.sig, &mut item_fn.block)?;
 
                     if let Self::InjectChecks(check_settings) = self
                         && let Some(ref panic_settings) = check_settings.does_panic
