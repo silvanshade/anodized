@@ -1,0 +1,5 @@
+error: `captures` is not supported on `const fn`
+ --> tests/compile_fail/const_captures.rs:3:8
+  |
+3 | #[spec(captures: before = value, ensures: |output| output == before)]
+  |        ^^^^^^^^

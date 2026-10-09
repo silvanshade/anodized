@@ -2,6 +2,9 @@
 #[path = "fns_tests.rs"]
 mod fns_tests;
 
+#[path = "const_fns.rs"]
+mod const_fns;
+
 use quote::ToTokens;
 use syn::{
     Attribute, Block, Expr, FnArg, Ident, Meta, Pat, Path, ReturnType, Signature, Stmt, Token,
@@ -26,11 +29,19 @@ impl Mode {
         sig: &mut Signature,
         body: &mut Block,
     ) -> Result<()> {
+        if sig.constness.is_some() && !spec.captures.is_empty() {
+            return Err(spec.spec_err("`captures` is not supported on `const fn`"));
+        }
+
         self.instrument_loops_in_fn_body(body)?;
 
         let Mode::InjectChecks(check_config) = self else {
             return Ok(());
         };
+
+        if sig.constness.is_some() {
+            return const_fns::instrument(check_config, spec, sig, body);
+        }
 
         sanitize_input_patterns(&mut sig.inputs, &spec.input_spec_flags);
 

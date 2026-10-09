@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **[anodized] `no_std` support** - Disable default features to build without the mathematical carriers; the default `logic` feature preserves the `logic` and `arithmetic` exports.
+- **[anodized] Const function specifications** - Direct preconditions, postconditions, and invariants support constant evaluation and runtime panic checks, including owned outputs. Unsupported captures and printing modes produce explicit diagnostics.
 
 ## 0.7.0 (2026 Sep 27)
 

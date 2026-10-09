@@ -104,6 +104,37 @@ The `#[cfg]` attribute follows standard Rust semantics: when the configuration p
 
 ## Function Specs
 
+### Constant functions
+
+`#[spec]` supports `const fn` with runtime checking disabled or with
+`anodized_panic`. Preconditions and invariants use direct Boolean checks;
+postconditions bind their output pattern, check it, and recover the owned value.
+No closure or non-const evaluator is introduced. Values with drop glue need no
+`Copy` or `Clone` bound; recovery avoids a temporary tuple requiring const destruction.
+All predicate expressions must themselves be const-compatible, including
+conditions disabled by `#[cfg]`. Disabled checks remain type-checked but are not evaluated.
+
+```rust
+use anodized::spec;
+
+#[spec(requires: value < 10, ensures: |result| result == value + 1)]
+const fn increment(value: u32) -> u32 { value + 1 }
+
+const FIVE: u32 = increment(4);
+assert_eq!(FIVE, increment(4));
+```
+
+With `anodized_panic`, violations panic at runtime and reject constant evaluation.
+Explicit returns pass through postconditions; nested functions, closures, and
+const blocks retain their own return boundaries. A body macro must not expand to
+a return from the enclosing function: attribute macros cannot rewrite tokens
+produced by later macro expansion.
+
+`captures`, type-spec markers, `anodized_print`, and `anodized_try` are rejected
+on const functions. Static spec embedding has its separate expansion and does
+not gain const support from this instrumentation mode.
+
+
 ### Preconditions, Postconditions, and Invariants
 
 Specifications are built from conditions, which come in three flavors:

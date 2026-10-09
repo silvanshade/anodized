@@ -1331,3 +1331,105 @@ fn try_call_invalid() {
         "must be a method call or a qualified function call",
     );
 }
+
+#[test]
+fn const_requires_disabled_is_type_checked() {
+    let input: SpecItemFn = parse_quote! {
+        #[spec(requires: value > 0)]
+        const fn positive(value: u32) -> u32 { value }
+    };
+    let expected: TokenStream = parse_quote! {
+        const fn positive(value: u32) -> u32 {
+            if false { let _: bool = value > 0; }
+            let __anodized_output: u32 = { value };
+            __anodized_output
+        }
+    };
+    let observed = Mode::DEFAULT
+        .instrument_item_fn(input.spec, input.node)
+        .unwrap();
+    assert_tokens_eq(&observed, &expected);
+}
+
+#[test]
+fn const_requires_panic_is_direct() {
+    let input: SpecItemFn = parse_quote! {
+        #[spec(#[cfg(feature = "checks")] requires: value > 0)]
+        const fn positive(value: u32) -> u32 { value }
+    };
+    let expected: TokenStream = parse_quote! {
+        const fn positive(value: u32) -> u32 {
+            if cfg!(feature = "checks") && !(value > 0) {
+                panic!("{}", "precondition failed: value > 0");
+            }
+            let __anodized_output: u32 = { value };
+            __anodized_output
+        }
+    };
+    let mode = Mode::InjectChecks(CheckSettings {
+        does_print: false,
+        does_panic: Some(crate::instrument::PanicSettings { has_try_fn: false }),
+    });
+    let observed = mode.instrument_item_fn(input.spec, input.node).unwrap();
+    assert_tokens_eq(&observed, &expected);
+}
+
+#[test]
+fn const_ensures_recovers_output() {
+    let input: SpecItemFn = parse_quote! {
+        #[spec(ensures: |(left, right)| left == right)]
+        const fn pair() -> (u32, u32) { (4, 4) }
+    };
+    let expected: TokenStream = parse_quote! {
+        const fn pair() -> (u32, u32) {
+            let __anodized_output: (u32, u32) = { (4, 4) };
+            let __anodized_output = {
+                let (left, right) = __anodized_output;
+                if false { let _: bool = left == right; }
+                (left, right)
+            };
+            __anodized_output
+        }
+    };
+    let observed = Mode::DEFAULT
+        .instrument_item_fn(input.spec, input.node)
+        .unwrap();
+    assert_tokens_eq(&observed, &expected);
+}
+
+#[test]
+fn const_maintains_checks_both_boundaries() {
+    let input: SpecItemFn = parse_quote! {
+        #[spec(maintains: *value < 10)]
+        const fn advance(value: &mut u32) { *value = value.saturating_add(1); }
+    };
+    let expected: TokenStream = parse_quote! {
+        const fn advance(value: &mut u32) {
+            if !(*value < 10) { panic!("{}", "precondition failed: * value < 10"); }
+            let __anodized_output: () = { *value = value.saturating_add(1); };
+            if !(*value < 10) { panic!("{}", "postcondition failed: * value < 10"); }
+            __anodized_output
+        }
+    };
+    let mode = Mode::InjectChecks(CheckSettings {
+        does_print: false,
+        does_panic: Some(crate::instrument::PanicSettings { has_try_fn: false }),
+    });
+    let observed = mode.instrument_item_fn(input.spec, input.node).unwrap();
+    assert_tokens_eq(&observed, &expected);
+}
+
+#[test]
+fn const_print_is_refused() {
+    let input: SpecItemFn = parse_quote! {
+        #[spec(requires: value > 0)]
+        const fn positive(value: u32) -> u32 { value }
+    };
+    let error = Mode::InjectChecks(CheckSettings::PRINT)
+        .instrument_item_fn(input.spec, input.node)
+        .unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "`anodized_print` is not supported on `const fn`; use `anodized_panic` instead"
+    );
+}
