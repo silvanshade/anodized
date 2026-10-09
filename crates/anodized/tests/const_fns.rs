@@ -10,8 +10,14 @@ use anodized::spec;
 /// - requires: the input is below ten.
 /// - ensures: returns the input plus one.
 /// - panics: an enabled precondition rejects inputs at or above ten.
+#[deny(
+    clippy::panic,
+    clippy::manual_assert,
+    clippy::nonminimal_bool,
+    clippy::missing_panics_doc
+)]
 #[spec(requires: value < 10, ensures: |output| output == value.saturating_add(1))]
-const fn increment(value: u32) -> u32 {
+pub const fn increment(value: u32) -> u32 {
     value.saturating_add(1)
 }
 

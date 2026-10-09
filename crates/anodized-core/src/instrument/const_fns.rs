@@ -1,7 +1,7 @@
 //! Closure-free checks for constant evaluation.
 
 use quote::ToTokens;
-use syn::{Block, Expr, Signature, Stmt, parse_quote, spanned::Spanned, visit_mut::VisitMut};
+use syn::{Block, Expr, Signature, Stmt, parse_quote, visit_mut::VisitMut};
 
 use crate::{
     FnSpec,
@@ -135,7 +135,7 @@ fn check(
     }
     let message = format!("{boundary} failed: {}", expression.to_token_stream());
     let guard = cfg.as_ref().map(|meta| quote::quote! { cfg!(#meta) && });
-    syn::parse_quote_spanned! { expression.span() =>
+    parse_quote! {
         if #guard !(#expression) { panic!("{}", #message); }
     }
 }
