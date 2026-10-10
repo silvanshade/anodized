@@ -47,7 +47,7 @@ Instead, ensure that both the impl block and the fn have a `#[spec]` annotation.
 
                         let spec_qualifiers_const = Self::build_qualifier_const_item(
                             &attrs,
-                            "__anodized_fn_qualifiers",
+                            "__ANODIZED_FN_QUALIFIERS",
                             fn_spec.qualifiers,
                             &item_fn.sig.ident,
                         );

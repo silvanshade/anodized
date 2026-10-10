@@ -156,7 +156,7 @@ Instead, you likely need to place a `#[spec]` attribute on an enclosing trait or
 
             let spec_qualifiers_const: ItemConst = Self::build_qualifier_const_item(
                 &attrs,
-                "__anodized_fn_qualifiers",
+                "__ANODIZED_FN_QUALIFIERS",
                 spec.qualifiers,
                 &item_fn.sig.ident,
             );
