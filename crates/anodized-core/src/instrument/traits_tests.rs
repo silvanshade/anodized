@@ -51,11 +51,11 @@ fn embed_spec_item_trait() {
 
             #[doc(hidden)]
             #[allow(warnings)]
-            const __anodized_fn_qualifiers_trait_FUNC: u32 = #qualifier_bits;
+            const __ANODIZED_FN_QUALIFIERS_TRAIT_FUNC: u32 = #qualifier_bits;
 
             #[doc(hidden)]
             #[allow(warnings)]
-            const __anodized_fn_qualifiers_FUNC: u32 = #qualifier_bits;
+            const __ANODIZED_FN_QUALIFIERS_FUNC: u32 = #qualifier_bits;
 
             fn FUNC(&self, PARAM_1: TYPE_1, PARAM_2: TYPE_2) -> RET_TYPE {
                 BODY
@@ -101,11 +101,11 @@ fn embed_spec_charon_item_trait() {
 
             #[doc(hidden)]
             #[allow(warnings)]
-            const __anodized_fn_qualifiers_trait_FUNC: u32 = #qualifier_bits;
+            const __ANODIZED_FN_QUALIFIERS_TRAIT_FUNC: u32 = #qualifier_bits;
 
             #[doc(hidden)]
             #[allow(warnings)]
-            const __anodized_fn_qualifiers_FUNC: u32 = #qualifier_bits;
+            const __ANODIZED_FN_QUALIFIERS_FUNC: u32 = #qualifier_bits;
 
             fn FUNC();
         }
@@ -138,11 +138,11 @@ fn default_instrument_item_trait() {
         trait TRAIT {
             #[doc(hidden)]
             #[allow(warnings)]
-            const __anodized_fn_qualifiers_trait_FUNC: u32 = #qualifier_bits;
+            const __ANODIZED_FN_QUALIFIERS_TRAIT_FUNC: u32 = #qualifier_bits;
 
             #[doc(hidden)]
             #[allow(warnings)]
-            const __anodized_fn_qualifiers_FUNC: u32 = #qualifier_bits;
+            const __ANODIZED_FN_QUALIFIERS_FUNC: u32 = #qualifier_bits;
 
             #[doc(hidden)]
             fn __anodized_FUNC(&self, PARAM_1: TYPE_1, PARAM_2: TYPE_2) -> RET_TYPE {
@@ -194,11 +194,11 @@ fn emit_try_fn_instrument_item_trait() {
         trait TRAIT {
             #[doc(hidden)]
             #[allow(warnings)]
-            const __anodized_fn_qualifiers_trait_FUNC: u32 = #qualifier_bits;
+            const __ANODIZED_FN_QUALIFIERS_TRAIT_FUNC: u32 = #qualifier_bits;
 
             #[doc(hidden)]
             #[allow(warnings)]
-            const __anodized_fn_qualifiers_FUNC: u32 = #qualifier_bits;
+            const __ANODIZED_FN_QUALIFIERS_FUNC: u32 = #qualifier_bits;
 
             #[doc(hidden)]
             fn __anodized_FUNC(&self, PARAM_1: TYPE_1, PARAM_2: TYPE_2) -> RET_TYPE {
@@ -296,7 +296,7 @@ fn embed_spec_item_impl_trait() {
 
             #[doc(hidden)]
             #[allow(warnings)]
-            const __anodized_fn_qualifiers_FUNC: u32 = #qualifier_bits;
+            const __ANODIZED_FN_QUALIFIERS_FUNC: u32 = #qualifier_bits;
 
             fn FUNC(&self, PARAM_1: TYPE_1, PARAM_2: TYPE_2) -> RET_TYPE {
                 BODY
@@ -342,7 +342,7 @@ fn embed_spec_charon_item_impl_trait() {
 
             #[doc(hidden)]
             #[allow(warnings)]
-            const __anodized_fn_qualifiers_FUNC: u32 = #qualifier_bits;
+            const __ANODIZED_FN_QUALIFIERS_FUNC: u32 = #qualifier_bits;
 
             fn FUNC() {}
         }
@@ -375,15 +375,15 @@ fn default_instrument_item_impl_trait() {
         impl TRAIT for IMPL_TYPE {
             #[doc(hidden)]
             #[allow(warnings)]
-            const __anodized_fn_qualifiers_FUNC: u32 = #qualifier_bits;
+            const __ANODIZED_FN_QUALIFIERS_FUNC: u32 = #qualifier_bits;
 
             #[inline]
             fn __anodized_FUNC(&self, PARAM_1: TYPE_1, PARAM_2: TYPE_2) -> RET_TYPE {
                 const {
                     assert!(
-                        Self::__anodized_fn_qualifiers_FUNC ==
-                            Self::__anodized_fn_qualifiers_trait_FUNC |
-                            Self::__anodized_fn_qualifiers_FUNC,
+                        Self::__ANODIZED_FN_QUALIFIERS_FUNC ==
+                            Self::__ANODIZED_FN_QUALIFIERS_TRAIT_FUNC |
+                            Self::__ANODIZED_FN_QUALIFIERS_FUNC,
                         "the qualifiers on the impl `IMPL_TYPE::FUNC` cannot be weaker than the qualifiers on the trait `TRAIT::FUNC`",
                     );
                 };
@@ -431,15 +431,15 @@ fn emit_try_fn_instrument_item_impl_trait() {
         impl TRAIT for IMPL_TYPE {
             #[doc(hidden)]
             #[allow(warnings)]
-            const __anodized_fn_qualifiers_FUNC: u32 = #qualifier_bits;
+            const __ANODIZED_FN_QUALIFIERS_FUNC: u32 = #qualifier_bits;
 
             #[inline]
             fn __anodized_FUNC(&self, PARAM_1: TYPE_1, PARAM_2: TYPE_2) -> RET_TYPE {
                 const {
                     assert!(
-                        Self::__anodized_fn_qualifiers_FUNC ==
-                            Self::__anodized_fn_qualifiers_trait_FUNC |
-                            Self::__anodized_fn_qualifiers_FUNC,
+                        Self::__ANODIZED_FN_QUALIFIERS_FUNC ==
+                            Self::__ANODIZED_FN_QUALIFIERS_TRAIT_FUNC |
+                            Self::__ANODIZED_FN_QUALIFIERS_FUNC,
                         "the qualifiers on the impl `IMPL_TYPE::FUNC` cannot be weaker than the qualifiers on the trait `TRAIT::FUNC`",
                     );
                 };

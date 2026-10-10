@@ -29,7 +29,7 @@ fn embed_spec_item_impl() {
         impl IMPL_TYPE {
             #[doc(hidden)]
             #[allow(warnings)]
-            const __anodized_fn_qualifiers_FUNC: u32 = #qualifier_bits;
+            const __ANODIZED_FN_QUALIFIERS_FUNC: u32 = #qualifier_bits;
 
             #[doc(hidden)]
             #[allow(warnings)]
@@ -80,7 +80,7 @@ fn embed_spec_charon_item_impl() {
         impl IMPL_TYPE {
             #[doc(hidden)]
             #[allow(warnings)]
-            const __anodized_fn_qualifiers_FUNC: u32 = #qualifier_bits;
+            const __ANODIZED_FN_QUALIFIERS_FUNC: u32 = #qualifier_bits;
 
             #[doc(hidden)]
             #[allow(warnings)]

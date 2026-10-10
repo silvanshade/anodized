@@ -119,7 +119,10 @@ impl Mode {
         fn_ident: &Ident,
     ) -> SomeConstItem {
         let qualifier_bits = qualifiers.bits();
-        let name: Ident = syn::Ident::new(&format!("{}_{}", prefix, fn_ident), fn_ident.span());
+        let name: Ident = syn::Ident::new(
+            &format!("{prefix}_{fn_ident}").to_uppercase(),
+            fn_ident.span(),
+        );
         parse_quote! {
             #(#attrs)*
             const #name: u32 = #qualifier_bits;
@@ -132,12 +135,12 @@ impl Mode {
         trait_path: &Path,
     ) -> Stmt {
         let impl_const_name = Ident::new(
-            &format!("__anodized_fn_qualifiers_{}", fn_ident),
+            &format!("__ANODIZED_FN_QUALIFIERS_{fn_ident}").to_uppercase(),
             fn_ident.span(),
         );
 
         let trait_const_name = Ident::new(
-            &format!("__anodized_fn_qualifiers_trait_{}", fn_ident),
+            &format!("__ANODIZED_FN_QUALIFIERS_TRAIT_{fn_ident}").to_uppercase(),
             fn_ident.span(),
         );
 
