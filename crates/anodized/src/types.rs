@@ -1,3 +1,8 @@
+//! Type refinements and their enforcement marker.
+
+#[cfg(feature = "logic")]
+use alloc::{boxed::Box, vec::Vec};
+
 pub use anodized_macros::Spec;
 
 #[diagnostic::on_unimplemented(
@@ -61,12 +66,14 @@ impl<T: Spec, E: Spec> Spec for Result<T, E> {
     }
 }
 
+#[cfg(feature = "logic")]
 impl<T: Spec + ?Sized> Spec for Box<T> {
     fn predicate(&self) -> bool {
         self.as_ref().predicate()
     }
 }
 
+#[cfg(feature = "logic")]
 impl<T: Spec> Spec for Vec<T> {
     fn predicate(&self) -> bool {
         <[T] as Spec>::predicate(self.as_slice())
