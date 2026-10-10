@@ -39,6 +39,11 @@ anodized = "0.7.0"
 
 For `no_std` targets, set `default-features = false` to disable the default `logic` feature and its `anodized::logic` and `anodized::arithmetic` exports. Spec expressions must be compatible with the target; `anodized_print` requires `std`.
 
+Type refinements (`#[spec(maintains: ...)]`), `anodized::types::Spec`, and the
+`Spec!(...)` marker are available without features. Refinements compose through
+references, slices, arrays, `Option`, `Result`, and tuples without allocation.
+The `logic` feature also enables the `Box` and `Vec` implementations.
+
 **2. Extend your code with specs.**
 
 Use the `#[spec]` attribute to attach preconditions and postconditions to functions, invariants to loops, and refinements to types. Each _condition_ is a standard Rust expression that evaluates to `bool`.
