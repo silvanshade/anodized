@@ -15,11 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@1.95.0
+        uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f
         with:
+          toolchain: 1.95.0
           components: rustfmt
 
       - name: Check formatting
@@ -31,10 +32,12 @@ jobs:
     needs: fmt
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@1.95.0
+        uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f
+        with:
+          toolchain: 1.95.0
 
       - name: Build cargo-anodized
         run: cargo build -p cargo-anodized
@@ -45,11 +48,12 @@ jobs:
     needs: fmt
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@1.95.0
+        uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f
         with:
+          toolchain: 1.95.0
           components: clippy
 
       - name: Lint anodized-core
@@ -82,18 +86,20 @@ jobs:
             test_flags: -- --skip compile_errors
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Install Rust stable toolchain
         if: matrix.toolchain == 'stable'
-        uses: dtolnay/rust-toolchain@1.95.0
+        uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f
         with:
+          toolchain: 1.95.0
           components: clippy
 
       - name: Install Rust Nightly toolchain
         if: matrix.toolchain == 'nightly'
-        uses: dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f
         with:
+          toolchain: nightly
           components: clippy
 
       - name: Lint anodized with flags `${{ matrix.flags }}`
@@ -113,10 +119,12 @@ jobs:
       RUSTFLAGS: ${{ matrix.rustflags }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@1.95.0
+        uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f
+        with:
+          toolchain: 1.95.0
 
       - name: Install bare-metal target
         run: rustup target add thumbv7em-none-eabi
@@ -133,11 +141,12 @@ jobs:
     needs: fmt
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@1.95.0
+        uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f
         with:
+          toolchain: 1.95.0
           components: clippy
 
       - name: Lint anodized-fmt
@@ -152,11 +161,12 @@ jobs:
     needs: fmt
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@1.95.0
+        uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f
         with:
+          toolchain: 1.95.0
           components: clippy
 
       - name: Lint anodized-logic
@@ -171,11 +181,12 @@ jobs:
     needs: fmt
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@1.95.0
+        uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f
         with:
+          toolchain: 1.95.0
           components: clippy
 
       - name: Lint test-util
@@ -190,11 +201,12 @@ jobs:
     needs: fmt
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Install Rust nightly toolchain
-        uses: dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f
         with:
+          toolchain: nightly
           components: clippy
 
       - name: Install cargo-fuzz
@@ -215,11 +227,12 @@ jobs:
         working-directory: ./examples/bin-search
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Install Rust nightly toolchain
-        uses: dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f
         with:
+          toolchain: nightly
           components: clippy rustfmt
 
       - name: Check formatting
