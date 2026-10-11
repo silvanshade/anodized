@@ -1,6 +1,7 @@
 #![cfg_attr(anodized_charon, feature(register_tool))]
 #![cfg_attr(anodized_charon, register_tool(charon))]
 #![deny(nonstandard_style)]
+#![deny(clippy::missing_inline_in_public_items)]
 
 use anodized::spec;
 
@@ -23,6 +24,7 @@ pub trait TestTrait {
         captures: old_val = self.current(),
         ensures: |output| output > old_val,
     )]
+    #[inline(never)]
     fn mul_by(&self, x: i32) -> i32 {
         x * 2
     }

@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **[anodized-core] Const check span hygiene** - Generated guards and panics retain macro-origin spans, so consumer lint policies apply to authored predicates without treating instrumentation as user code.
 - **[anodized-core] Qualifier constant names** - Generated qualifier metadata and its references use uppercase identifiers, so consumers can deny `nonstandard-style` without allowing generated constant names.
+- **[anodized-core] Trait wrapper inline hints** - Generated trait wrappers, inherited default bodies, and embedded predicate helpers carry inline hints without overriding authored inline attributes, so consumers can deny missing inline hints.
 - **[anodized] Core-only type refinements** - `types::Spec`, its marker macro, and non-allocating container implementations work without `logic`, including type-spec enforcement at function and field boundaries.
 
 ## 0.7.0 (2026 Sep 27)

@@ -29,6 +29,7 @@ fn embed_spec_item_trait() {
         trait TRAIT {
             #[doc(hidden)]
             #[allow(warnings)]
+            #[inline]
             fn __anodized_fn_requires_FUNC(&self, PARAM_1: TYPE_1, PARAM_2: TYPE_2) -> bool {
                 let __anodized_pre = true;
                 let __anodized_pre = __anodized_pre & ::anodized::__::eval::<bool>(|| COND_1);
@@ -38,6 +39,7 @@ fn embed_spec_item_trait() {
 
             #[doc(hidden)]
             #[allow(warnings)]
+            #[inline]
             fn __anodized_fn_ensures_FUNC(&self, PARAM_1: TYPE_1, PARAM_2: TYPE_2, __anodized_output: RET_TYPE) -> bool {
                 let __anodized_output = ::anodized::__::eval_once(|| { __anodized_output });
                 let __anodized_post = true;
@@ -84,6 +86,7 @@ fn embed_spec_charon_item_trait() {
         trait TRAIT {
             #[doc(hidden)]
             #[allow(warnings)]
+            #[inline]
             #[charon::contract(kind = "precondition", for = "FUNC")]
             fn __anodized_fn_requires_FUNC() -> bool {
                 let __anodized_pre = true;
@@ -92,6 +95,7 @@ fn embed_spec_charon_item_trait() {
 
             #[doc(hidden)]
             #[allow(warnings)]
+            #[inline]
             #[charon::contract(kind = "postcondition", for = "FUNC")]
             fn __anodized_fn_ensures_FUNC(__anodized_output: ()) -> bool {
                 let __anodized_output = ::anodized::__::eval_once(|| { __anodized_output });
@@ -145,10 +149,12 @@ fn default_instrument_item_trait() {
             const __ANODIZED_FN_QUALIFIERS_FUNC: u32 = #qualifier_bits;
 
             #[doc(hidden)]
+            #[inline]
             fn __anodized_FUNC(&self, PARAM_1: TYPE_1, PARAM_2: TYPE_2) -> RET_TYPE {
                 BODY
             }
 
+            #[inline]
             fn FUNC(&self, PARAM_1: TYPE_1, PARAM_2: TYPE_2) -> RET_TYPE {
                 let __anodized_pre = true;
                 let __anodized_pre = __anodized_pre & (true || ::anodized::__::eval::<bool>(|| COND_1));
@@ -201,10 +207,12 @@ fn emit_try_fn_instrument_item_trait() {
             const __ANODIZED_FN_QUALIFIERS_FUNC: u32 = #qualifier_bits;
 
             #[doc(hidden)]
+            #[inline]
             fn __anodized_FUNC(&self, PARAM_1: TYPE_1, PARAM_2: TYPE_2) -> RET_TYPE {
                 BODY
             }
 
+            #[inline]
             fn FUNC(&self, input_1: TYPE_1, input_2: TYPE_2) -> RET_TYPE {
                 match Self::__anodized_fn_try_FUNC(self, input_1, input_2) {
                     ::anodized::result::Result::Ok(output) => output,
@@ -274,6 +282,7 @@ fn embed_spec_item_impl_trait() {
         impl TRAIT for IMPL_TYPE {
             #[doc(hidden)]
             #[allow(warnings)]
+            #[inline]
             fn __anodized_fn_requires_FUNC(&self, PARAM_1: TYPE_1, PARAM_2: TYPE_2) -> bool {
                 let __anodized_pre = true;
                 let __anodized_pre = __anodized_pre & ::anodized::__::eval::<bool>(|| COND_1);
@@ -283,6 +292,7 @@ fn embed_spec_item_impl_trait() {
 
             #[doc(hidden)]
             #[allow(warnings)]
+            #[inline]
             fn __anodized_fn_ensures_FUNC(&self, PARAM_1: TYPE_1, PARAM_2: TYPE_2, __anodized_output: RET_TYPE) -> bool {
                 let __anodized_output = ::anodized::__::eval_once(|| { __anodized_output });
                 let __anodized_post = true;
@@ -325,6 +335,7 @@ fn embed_spec_charon_item_impl_trait() {
         impl TRAIT for IMPL_TYPE {
             #[doc(hidden)]
             #[allow(warnings)]
+            #[inline]
             #[charon::contract(kind = "precondition", for = "FUNC")]
             fn __anodized_fn_requires_FUNC() -> bool {
                 let __anodized_pre = true;
@@ -333,6 +344,7 @@ fn embed_spec_charon_item_impl_trait() {
 
             #[doc(hidden)]
             #[allow(warnings)]
+            #[inline]
             #[charon::contract(kind = "postcondition", for = "FUNC")]
             fn __anodized_fn_ensures_FUNC(__anodized_output: ()) -> bool {
                 let __anodized_output = ::anodized::__::eval_once(|| { __anodized_output });
