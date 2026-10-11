@@ -47,7 +47,11 @@ impl Mode {
 
                     if let Self::EmbedSpecs(_) = self {
                         // Embed `spec` elements as `__anodized_fn_*` items.
-                        let mut spec_requires_attrs = attrs.to_vec();
+                        let mut spec_requires_attrs = attrs
+                            .iter()
+                            .cloned()
+                            .chain([parse_quote!(#[inline])])
+                            .collect();
                         let mut spec_requires_sig = self.build_precondition_fn_sig(
                             &mut spec_requires_attrs,
                             "__anodized_fn_requires",
@@ -75,7 +79,11 @@ impl Mode {
                             default: Some(spec_requires_body),
                             semi_token: None,
                         };
-                        let mut spec_ensures_attrs = attrs.to_vec();
+                        let mut spec_ensures_attrs = attrs
+                            .iter()
+                            .cloned()
+                            .chain([parse_quote!(#[inline])])
+                            .collect();
                         let mut spec_ensures_sig = self.build_postcondition_fn_sig(
                             &mut spec_ensures_attrs,
                             "__anodized_fn_ensures",
@@ -139,6 +147,9 @@ impl Mode {
                         mangled_fn.sig.ident = mangled_ident.clone();
                         mangled_fn.attrs.retain(|attr| !attr.path().is_ident("doc"));
                         mangled_fn.attrs.push(parse_quote!(#[doc(hidden)]));
+                        if mangled_fn.default.is_some() && !has_inline_attr(&mangled_fn.attrs) {
+                            mangled_fn.attrs.push(parse_quote!(#[inline]));
+                        }
                         new_trait_items.push(TraitItem::Fn(mangled_fn));
 
                         let call_args = build_call_args(&func.sig.inputs)?;
@@ -150,6 +161,9 @@ impl Mode {
 
                         func.default = Some(forwarding_body);
                         func.semi_token = None;
+                        if !has_inline_attr(&func.attrs) {
+                            func.attrs.push(parse_quote!(#[inline]));
+                        }
                     }
 
                     if let Self::InjectChecks(check_settings) = self
@@ -250,7 +264,11 @@ Instead, ensure that both the trait and the impl fn have a `#[spec]` annotation.
 
                     if let Self::EmbedSpecs(_) = self {
                         // Embed `spec` elements as `__anodized_fn_*` items.
-                        let mut spec_requires_attrs = attrs.to_vec();
+                        let mut spec_requires_attrs = attrs
+                            .iter()
+                            .cloned()
+                            .chain([parse_quote!(#[inline])])
+                            .collect();
                         let mut spec_requires_sig = self.build_precondition_fn_sig(
                             &mut spec_requires_attrs,
                             "__anodized_fn_requires",
@@ -279,7 +297,11 @@ Instead, ensure that both the trait and the impl fn have a `#[spec]` annotation.
                             vis: Visibility::Inherited,
                             defaultness: None,
                         };
-                        let mut spec_ensures_attrs = attrs.to_vec();
+                        let mut spec_ensures_attrs = attrs
+                            .iter()
+                            .cloned()
+                            .chain([parse_quote!(#[inline])])
+                            .collect();
                         let mut spec_ensures_sig = self.build_postcondition_fn_sig(
                             &mut spec_ensures_attrs,
                             "__anodized_fn_ensures",
